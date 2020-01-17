@@ -13,9 +13,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -32,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap bitmap4;
     File file;
     private Button btn_save;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,18 +142,24 @@ public class MainActivity extends AppCompatActivity {
     private void query() {
         Connection connection = null;
         try {
-            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:jtds:sqlserver://222.122.213.216/mashw08", "mashw08", "msts0850op");
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("insert into Su_배너이미지2(BLOBData) VALUES (convert(VARBINARY(max),'"+mImage+"'))");
 
-            while (resultSet.next()){
+                Class.forName("net.sourceforge.jtds.jdbc.Driver");
+                connection = DriverManager.getConnection("jdbc:jtds:sqlserver://222.122.213.216/mashw08", "mashw08", "msts0850op");
+                PreparedStatement pstm=connection.prepareStatement("insert into Su_배너이미지테스트(BLOBData) VALUES (?)");
+                FileInputStream fis = new FileInputStream(file);
+                pstm.setBinaryStream(2, (InputStream)fis, (int)file.length());
+                pstm.executeUpdate();
+//            bitmap.compress(CompressFormat.PNG, 100, os);
 
-            }
-            connection.close();
-        } catch (ClassNotFoundException e) {
+//            JOptionPane.showMessageDialog(null, "Image Successfully Uploaded to Database");
+                pstm.close();
+                connection.close();
+
+            } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
